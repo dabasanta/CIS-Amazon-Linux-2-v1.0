@@ -339,6 +339,30 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  echo -e "${good} 1.2.1 Ensure package manager repositories are configured [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.2.1, Ensure package manager repositories are configure, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 1.2.2 Ensure GPG keys are configured [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.2.2, Ensure GPG keys are configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 1.2.3 Ensure gpgcheck is globally activated [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.2.3, Ensure gpgcheck is globally activated, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 1.3.1 Ensure AIDE is installed [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.3.1, Ensure AIDE is installed, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
 
 
 
