@@ -363,6 +363,21 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  grep -r aide /etc/cron.* /etc/crontab > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 1.3.2 Ensure filesystem integrity is regularly checked [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.3.2 Ensure filesystem integrity is regularly checked [${fail}${out}${end}]"
+  fi
+  echo "1.3.2, Ensure filesystem integrity is regularly checked, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "\n${good}1.4. Secure Boot Settings${end}\n"
+
 
 
 
