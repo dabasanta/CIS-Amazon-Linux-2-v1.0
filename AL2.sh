@@ -415,7 +415,33 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  echo -e "\n${good}1.5. Additional Process Hardening${end}\n"
 
+  dumpeable=$(sysctl fs.suid_dumpable | cut -d '=' -f 2 | sed 's/\s//g')
+  if [ $dumpeable -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 1.5.1 Ensure core dumps are restricted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.5.1 Ensure core dumps are restricted [${fail}${out}${end}]"
+  fi
+  echo "1.5.1, Ensure core dumps are restricted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  aslr=$(sysctl kernel.randomize_va_space | cut -d '=' -f 2 | sed 's/\s//g')
+  if [ $aslr -eq 2 ]; then
+    local out="PASS"
+    echo -e "${good} 1.5.2 Ensure address space layout randomization (ASLR) is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.5.2 Ensure address space layout randomization (ASLR) is enabled [${fail}${out}${end}]"
+  fi
+  echo "1.5.2, Ensure address space layout randomization (ASLR) is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
 
 
