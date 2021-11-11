@@ -378,6 +378,43 @@ checkL1() {
 
   echo -e "\n${good}1.4. Secure Boot Settings${end}\n"
 
+  if test -f "/boot/grub2/grub.cfg"; then
+    uid=$(stat /boot/grub2/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /boot/grub2/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 1.4.1 Ensure permissions on bootloader config are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 1.4.1 Ensure permissions on bootloader config are configured [${fail}${out}${end}]"
+    fi
+    echo "1.4.1, Ensure permissions on bootloader config are configured, $out" >> $report
+    checks=$((checks+1))
+    $slp
+  fi
+  if test -f "/boot/grub/grub.cfg"; then
+    uid=$(stat /boot/grub/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /boot/grub/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    if [ $? -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 1.4.1 Ensure permissions on bootloader config are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 1.4.1 Ensure permissions on bootloader config are configured [${fail}${out}${end}]"
+    fi
+    echo "1.4.1, Ensure permissions on bootloader config are configured, $out" >> $report
+    checks=$((checks+1))
+    $slp
+  fi
+
+  echo -e "${good} 1.4.2 Ensure authentication required for single user mode [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.4.2, Ensure authentication required for single user mode, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
 
 
 
