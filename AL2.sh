@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# VOY POR LA PAGINA 51
 #Scored
 #Failure to comply with "Scored" recommendations will decrease the final benchmark score.
 #Compliance with "Scored" recommendations will increase the final benchmark score.
@@ -11,15 +12,22 @@
 #
 
 banner() {
-  # banner here
-  local n=0
+  echo "     ██████╗██╗███████╗               █████╗ ██╗     ██████╗ ";
+  echo "    ██╔════╝██║██╔════╝              ██╔══██╗██║     ╚════██╗";
+  echo "    ██║     ██║███████╗    █████╗    ███████║██║      █████╔╝";
+  echo "    ██║     ██║╚════██║    ╚════╝    ██╔══██║██║     ██╔═══╝ ";
+  echo "    ╚██████╗██║███████║              ██║  ██║███████╗███████╗";
+  echo "     ╚═════╝╚═╝╚══════╝              ╚═╝  ╚═╝╚══════╝╚══════╝";
+  echo "                                                             ";
+  echo " CIS - Amazon Linux 2 - BenchMark v1.0"
+  echo -e " https://www.cisecurity.org/benchmark/amazon_linux/ \n\n\n"
 }
 
 passed="\e[1m\e[92m"
 fail="\e[1m\e[91m"
 end="\e[0m"
 good="[\e[92m+${end}]"
-bad="[\e[91m+${end}]"
+bad="[\e[91m-${end}]"
 slp="sleep 0.2"
 
 getTime() {
@@ -312,11 +320,39 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  echo -e "${good} 1.1.18 Ensure sticky bit is set on all world-writable directories [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "1.1.18, Ensure sticky bit is set on all world-writable directories, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled autofs 2>/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 1.1.19 Disable Automounting [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.1.19 Disable Automounting [${fail}${out}${end}]"
+  fi
+  echo "1.1.19, Disable Automounting, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
+
+
   echo $checks
   echo $counter
 
 
 }
 
+banner
 initCSV
 checkL1
+
+
