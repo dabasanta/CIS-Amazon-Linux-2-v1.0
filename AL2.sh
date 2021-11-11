@@ -711,7 +711,18 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-
+  systemctl is-enabled smb > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.12 Ensure Samba is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.12 Ensure Samba is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.12, Ensure Samba is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
 
 
