@@ -417,8 +417,9 @@ checkL1() {
 
   echo -e "\n${good}1.5. Additional Process Hardening${end}\n"
 
+  local dumpeable
   dumpeable=$(sysctl fs.suid_dumpable | cut -d '=' -f 2 | sed 's/\s//g')
-  if [ $dumpeable -eq 0 ]; then
+  if [ "$dumpeable" -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 1.5.1 Ensure core dumps are restricted [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -430,8 +431,9 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  local aslr
   aslr=$(sysctl kernel.randomize_va_space | cut -d '=' -f 2 | sed 's/\s//g')
-  if [ $aslr -eq 2 ]; then
+  if [ "$alr" -eq 2 ]; then
     local out="PASS"
     echo -e "${good} 1.5.2 Ensure address space layout randomization (ASLR) is enabled [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -440,6 +442,272 @@ checkL1() {
     echo -e "${bad} 1.5.2 Ensure address space layout randomization (ASLR) is enabled [${fail}${out}${end}]"
   fi
   echo "1.5.2, Ensure address space layout randomization (ASLR) is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  #1.5.3 Ensure prelink is disabled
+  # rpm -q prelink
+
+  echo -e "\n${good}1.6 Mandatory Access Control${end}\n"
+
+  #1.6.1.1 Ensure SELinux is not disabled in bootloader configuration
+  #grep "^\s*linux" /boot/grub2/grub.cfg
+
+  grep SELINUX=enforcing /etc/selinux/config > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 1.6.1.2 Ensure the SELinux state is enforcing [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.6.1.2 Ensure the SELinux state is enforcing [${fail}${out}${end}]"
+  fi
+  echo "1.6.1.2, Ensure the SELinux state is enforcing, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local status
+  status=$(sestatus | cut -d : -f 2 | sed 's/\s//g')
+  if [ "$status" == "targeted" ]; then
+    local out="PASS"
+    echo -e "${good} 1.6.1.3 Ensure SELinux policy is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.6.1.3 Ensure SELinux policy is configured [${fail}${out}${end}]"
+  fi
+  echo "1.6.1.3, Ensure SELinux policy is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  #1.6.1.4 Ensure SETroubleshoot is not installed
+  #rpm -q setroubleshoot
+
+  #1.6.1.5 Ensure the MCS Translation Service (mcstrans) is not installed
+  #rpm -q mcstrans
+
+  #1.6.1.6 Ensure no unconfined daemons exist
+  #ps -eZ | egrep "initrc" | egrep -vw "tr|ps|egrep|bash|awk" | tr ':' ' ' | awk '{ print $NF }'
+
+  #1.6.2 Ensure SELinux is installed
+  #rpm -q libselinux
+
+  echo -e "\n${good}1.7 Warning Banners${end}\n"
+
+  #1.7.1.1 Ensure message of the day is configured properly
+  #cat /etc/motd
+  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/motd
+
+  #1.7.1.2 Ensure local login warning banner is configured properly
+  #cat /etc/issue
+  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/issue
+
+  #1.7.1.3 Ensure remote login warning banner is configured properly
+  #cat /etc/issue.net
+  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/issue.net
+
+  if test -f "/etc/motd"; then
+    uid=$(stat /etc/motd | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/motd | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 1.7.1.4 Ensure permissions on /etc/motd are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 1.7.1.4 Ensure permissions on /etc/motd are configured [${fail}${out}${end}]"
+    fi
+    echo "1.7.1.4, Ensure permissions on /etc/motd are configured, $out" >> $report
+    checks=$((checks+1))
+    $slp
+  fi
+
+  if test -f "/etc/issue"; then
+    uid=$(stat /etc/issue | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/issue | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 1.7.1.5 Ensure permissions on /etc/issue are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 1.7.1.5 Ensure permissions on /etc/issue are configured [${fail}${out}${end}]"
+    fi
+    echo "1.7.1.5, Ensure permissions on /etc/issue are configured, $out" >> $report
+    checks=$((checks+1))
+    $slp
+  fi
+
+  if test -f "/etc/issue.net"; then
+    uid=$(stat /etc/issue.net | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/issue.net | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 1.7.1.6 Ensure permissions on /etc/issue.net are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 1.7.1.6 Ensure permissions on /etc/issue.net are configured [${fail}${out}${end}]"
+    fi
+    echo "1.7.1.6, Ensure permissions on /etc/issue.net are configured, $out" >> $report
+    checks=$((checks+1))
+    $slp
+  fi
+
+  #1.8 Ensure updates, patches, and additional security software are installed
+  #yum check-update --security
+
+  echo -e "\n${good}2. Services${end}\n2.1 Special Purpose Services\n"
+
+  #2.1.1.1 Ensure time synchronization is in use
+  # rpm -q ntp
+# rpm -q chrony
+
+  #2.1.1.2 Ensure ntp is configured
+  #grep "^restrict" /etc/ntp.conf
+  # grep "^(server|pool)" /etc/ntp.conf
+  # grep "^OPTIONS" /etc/sysconfig/ntpd
+  # grep "^ExecStart" /usr/lib/systemd/system/ntpd.service
+
+  #2.1.1.3 Ensure chrony is configured
+  #grep "^(server|pool)" /etc/chrony.conf
+  #grep ^OPTIONS /etc/sysconfig/chronyd
+
+  #2.1.2 Ensure X Window System is not installed
+  # rpm -qa xorg-x11*
+
+  systemctl is-enabled avahi-daemon > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.3 Ensure Avahi Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.3 Ensure Avahi Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.3, Ensure Avahi Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled cups > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.4 Ensure CUPS is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.4 Ensure CUPS is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.4, Ensure CUPS is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled dhcpd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.5 Ensure DHCP Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.5 Ensure DHCP Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.5, Ensure DHCP Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled slapd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.6 Ensure LDAP server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.6 Ensure LDAP server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.6, Ensure LDAP server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled nfs > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
+  else
+    systemctl is-enabled nfs-server > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="FAIL"
+      echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
+    else
+      systemctl is-enabled rpcbind > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        local out="FAIL"
+        echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
+      else
+        local out="PASS"
+        echo -e "${good} 2.1.7 Ensure NFS and RPC are not enabled [${passed}${out}${end}]"
+        counter=$((counter+1))
+      fi
+    fi
+  fi
+  echo "2.1.7, Ensure NFS and RPC are not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled named > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.8 Ensure DNS Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.8 Ensure DNS Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.8, Ensure DNS Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled vsftpd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.9 Ensure FTP Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.9 Ensure FTP Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.9, Ensure FTP Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled httpd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.10 Ensure HTTP server is not enabled [${fail}${out}${end}]"
+  else
+    systemctl is-enabled apache2 > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="FAIL"
+      echo -e "${bad} 2.1.10 Ensure HTTP server is not enabled [${fail}${out}${end}]"
+    else
+      local out="PASS"
+      echo -e "${good} 2.1.10 Ensure HTTP server is not enabled [${passed}${out}${end}]"
+      counter=$((counter+1))
+    fi
+  fi
+  echo "2.1.10, Ensure HTTP server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled dovecot > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.11 Ensure IMAP and POP3 server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.11 Ensure IMAP and POP3 server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.11, Ensure IMAP and POP3 server is not enabled, $out" >> $report
   checks=$((checks+1))
   $slp
 
