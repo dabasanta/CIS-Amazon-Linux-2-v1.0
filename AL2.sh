@@ -534,17 +534,44 @@ checkL1() {
 
   echo -e "\n${good}1.7 Warning Banners${end}\n"
 
-  #1.7.1.1 Ensure message of the day is configured properly
-  #cat /etc/motd
-  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/motd
+  grep -E '(\\v|\\r|\\m|\\s|\\S|Amazon)' /etc/motd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.7.1.1 Ensure message of the day is configured properly [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.7.1.1 Ensure message of the day is configured properly [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.7.1.1, Ensure message of the day is configured properly, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #1.7.1.2 Ensure local login warning banner is configured properly
-  #cat /etc/issue
-  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/issue
+  grep -E '(\\v|\\r|\\m|\\s|\\S|Amazon)' /etc/issue > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.7.1.2 Ensure local login warning banner is configured properly [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.7.1.2 Ensure local login warning banner is configured properly [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.7.1.2, Ensure local login warning banner is configured properly, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #1.7.1.3 Ensure remote login warning banner is configured properly
-  #cat /etc/issue.net
-  #egrep -i '(\\v|\\r|\\m|\\s|Amazon)' /etc/issue.net
+  grep -E '(\\v|\\r|\\m|\\s|\\S|Amazon)' /etc/issue.net > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.7.1.3 Ensure remote login warning banner is configured properly [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.7.1.3 Ensure remote login warning banner is configured properly [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.7.1.3, Ensure remote login warning banner is configured properly, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   if test -f "/etc/motd"; then
     uid=$(stat /etc/motd | grep 'Uid' | awk '{print $5}' | tr -d '/')
@@ -1076,24 +1103,184 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  # 3.2.1 Ensure source routed packets are not accepted
-  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # sysctl net.ipv4.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  local line;local var1;local var2;local var3;local var4;local var5;local var6;local var7;local var8;local var9;local var10;local var11;local var12;local var13
+  var1=$(sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv4.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g')
+  var3=$(sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g')
 
-  #for i in $(grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g');do echo $i;done
-  #### recorrer este for y colocar una variable, si ambos o mas valores son cero pues paso, si no no.
+  while IFS= read -r line
+  do
+    var4=$line
+    var5=$line
+  done < <(grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
 
-  #grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
+  while IFS= read -r line
+  do
+    var6=$line
+    var7=$line
+  done < <(grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
 
-  # sysctl net.ipv6.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # sysctl net.ipv6.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
-  # grep "net\.ipv6\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
-  # grep "net\.ipv6\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
+  var8=$(sysctl net.ipv6.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g')
+  var9=$(sysctl net.ipv6.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g')
 
-## Vamos por la 148 !!
+  while IFS= read -r line
+  do
+    var10=$line
+    var11=$line
+  done < <(grep "net\.ipv6\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var12=$line
+    var13=$line
+  done < <(grep "net\.ipv6\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ]  && [ "$var7" -eq 0 ] && [ "$var8" -eq 0 ]  && [ "$var9" -eq 0 ] && [ "$var10" -eq 0 ]  && [ "$var11" -eq 0 ] && [ "$var12" -eq 0 ]  && [ "$var13" -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.1 Ensure source routed packets are not accepted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.1 Ensure source routed packets are not accepted [${fail}${out}${end}]"
+  fi
+  echo "3.2.1, Ensure source routed packets are not accepted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.conf.all.accept_redirects | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv4.conf.default.accept_redirects | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var3=$line
+    var4=$line
+  done < <(grep "net\.ipv4\.conf\.all\.accept_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var5=$line
+    var6=$line
+  done < <(grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  var7=$(sysctl net.ipv6.conf.all.accept_redirects | cut -d = -f 2 | sed 's/\s//g')
+  var8=$(sysctl net.ipv6.conf.default.accept_redirects | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var9=$line
+    var10=$line
+  done < <(grep "net\.ipv6\.conf\.all\.accept_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var11=$line
+    var12=$line
+  done < <(grep "net\.ipv6\.conf\.default\.accept_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ]  && [ "$var7" -eq 0 ] && [ "$var8" -eq 0 ]  && [ "$var9" -eq 0 ] && [ "$var10" -eq 0 ]  && [ "$var11" -eq 0 ] && [ "$var12" -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.2 Ensure ICMP redirects are not accepted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.2 Ensure ICMP redirects are not accepted [${fail}${out}${end}]"
+  fi
+  echo "3.2.2, Ensure ICMP redirects are not accepted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.conf.all.secure_redirects | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv4.conf.default.secure_redirects | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var3=$line
+    var4=$line
+  done < <(grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var5=$line
+    var6=$line
+  done < <(grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.3 Ensure secure ICMP redirects are not accepted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.3 Ensure secure ICMP redirects are not accepted [${fail}${out}${end}]"
+  fi
+  echo "3.2.3, Ensure secure ICMP redirects are not accepted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.conf.all.log_martians | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv4.conf.default.log_martians | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var3=$line
+    var4=$line
+  done < <(grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var5=$line
+    var6=$line
+  done < <(grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.4 Ensure suspicious packets are logged [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.4 Ensure suspicious packets are logged [${fail}${out}${end}]"
+  fi
+  echo "3.2.4, Ensure suspicious packets are logged, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.icmp_echo_ignore_broadcasts | cut -d = -f 2 | sed 's/\s//g')
+  while IFS= read -r line
+  do
+    var2=$line
+    var3=$line
+  done < <(grep "net\.ipv4\.icmp_echo_ignore_broadcasts" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 1 ] && [ "$var2" -eq 1 ] && [ "$var3" -eq 1 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.5 Ensure broadcast ICMP requests are ignored [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.5 Ensure broadcast ICMP requests are ignored [${fail}${out}${end}]"
+  fi
+  echo "3.2.5, Ensure broadcast ICMP requests are ignored, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.icmp_ignore_bogus_error_responses | cut -d = -f 2 | sed 's/\s//g')
+  while IFS= read -r line
+  do
+    var2=$line
+    var3=$line
+  done < <(grep "net\.ipv4\.icmp_ignore_bogus_error_responses" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 1 ] && [ "$var2" -eq 1 ] && [ "$var3" -eq 1 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.6 Ensure bogus ICMP responses are ignored [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.6 Ensure bogus ICMP responses are ignored [${fail}${out}${end}]"
+  fi
+  echo "3.2.6, Ensure bogus ICMP responses are ignored, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
 
 
 
