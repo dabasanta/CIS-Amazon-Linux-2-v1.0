@@ -900,9 +900,24 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  # 3.2.1 Ensure source routed packets are not accepted
+  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # sysctl net.ipv4.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # sysctl net.ipv4.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
 
+  #for i in $(grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g');do echo $i;done
+  #### recorrer este for y colocar una variable, si ambos o mas valores son cero pues paso, si no no.
 
+  #grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
 
+  # sysctl net.ipv6.conf.all.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # sysctl net.ipv6.conf.default.accept_source_route | cut -d = -f 2 | sed 's/\s//g'
+  # grep "net\.ipv6\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
+  # grep "net\.ipv6\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*
+
+## Vamos por la 148 !!
 
 
 
