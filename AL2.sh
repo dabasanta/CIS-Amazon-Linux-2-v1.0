@@ -724,6 +724,186 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  systemctl is-enabled squid > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.13 Ensure HTTP Proxy Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.13 Ensure HTTP Proxy Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.13, Ensure HTTP Proxy Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled snmpd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.14 Ensure SNMP Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.14 Ensure SNMP Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.14, Ensure SNMP Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  netstat -an | grep LIST | grep ":25[[:space:]]" > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.15 Ensure mail transfer agent is configured for local-only mode [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.15 Ensure mail transfer agent is configured for local-only mode [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.15, Ensure mail transfer agent is configured for local-only mode, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled ypserv > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.16 Ensure NIS Server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.16 Ensure NIS Server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.16, Ensure NIS Server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled rsh.socket > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
+  else
+     systemctl is-enabled rlogin.socket > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="FAIL"
+      echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
+    else
+      systemctl is-enabled rexec.socket > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        local out="FAIL"
+        echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
+      else
+        local out="PASS"
+        echo -e "${good} 2.1.17 Ensure rsh server is not enabled [${passed}${out}${end}]"
+        counter=$((counter+1))
+      fi
+    fi
+  fi
+  echo "2.1.17, Ensure rsh server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled telnet.socket > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.18 Ensure telnet server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.18 Ensure telnet server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.18, Ensure telnet server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled tftp.socket > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.19 Ensure tftp server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.19 Ensure tftp server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.19, Ensure tftp server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled rsyncd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.20 Ensure rsync service is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.20 Ensure rsync service is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.20, Ensure rsync service is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  systemctl is-enabled ntalk > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.21 Ensure talk server is not enabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.21 Ensure talk server is not enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.21, Ensure talk server is not enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  #2.2.1 Ensure NIS Client is not installed
+  #rpm -q ypbind
+
+  #2.2.2 Ensure rsh client is not installed
+  #rpm -q rsh
+
+  #2.2.3 Ensure talk client is not installed
+  # rpm -q talk
+
+  #2.2.4 Ensure telnet client is not installed
+  #rpm -q telnet
+
+  #2.2.5 Ensure LDAP client is not installed
+  #rpm -q openldap-clients
+
+  echo -e "\n${good}3. Network Configuration${end}\n"
+
+  local ipv4; local ipv6
+  ipv4=$(sysctl net.ipv4.ip_forward | cut -d = -f 2 | sed 's/\s//g')
+  ipv6=$(sysctl net.ipv6.conf.all.forwarding | cut -d = -f 2 | sed 's/\s//g')
+  if [ "$ipv4" -eq 0 ] && [ "$ipv6" -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.1.1 Ensure IP forwarding is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.1.1 Ensure IP forwarding is disabled [${fail}${out}${end}]"
+  fi
+  echo "3.1.1, Ensure IP forwarding is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local send_redirects; local send_redirects2
+  send_redirects=$(sysctl net.ipv4.conf.all.send_redirects | cut -d = -f 2 | sed 's/\s//g')
+  send_redirects2=$(sysctl net.ipv4.conf.default.send_redirects | cut -d = -f 2 | sed 's/\s//g')
+  if [ "$send_redirects" -eq 0 ] && [ "$send_redirects2" -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.1.2 Ensure packet redirect sending is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.1.2 Ensure packet redirect sending is disabled [${fail}${out}${end}]"
+  fi
+  echo "3.1.2, Ensure packet redirect sending is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
 
 
   echo $checks
