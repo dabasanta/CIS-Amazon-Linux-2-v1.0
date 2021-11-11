@@ -445,8 +445,18 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  #1.5.3 Ensure prelink is disabled
-  # rpm -q prelink
+  rpm -q prelink > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.5.3 Ensure prelink is disabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.5.3 Ensure prelink is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.5.3, Ensure prelink is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   echo -e "\n${good}1.6 Mandatory Access Control${end}\n"
 
@@ -480,17 +490,47 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  #1.6.1.4 Ensure SETroubleshoot is not installed
-  #rpm -q setroubleshoot
+  rpm -q setroubleshoot > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.6.1.4 Ensure SETroubleshoot is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.6.1.4 Ensure SETroubleshoot is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.6.1.4, Ensure SETroubleshoot is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #1.6.1.5 Ensure the MCS Translation Service (mcstrans) is not installed
-  #rpm -q mcstrans
+  rpm -q mcstrans > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.6.1.5 Ensure the MCS Translation Service (mcstrans) is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.6.1.5 Ensure the MCS Translation Service (mcstrans) is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.6.1.5, Ensure the MCS Translation Service (mcstrans) is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   #1.6.1.6 Ensure no unconfined daemons exist
   #ps -eZ | egrep "initrc" | egrep -vw "tr|ps|egrep|bash|awk" | tr ':' ' ' | awk '{ print $NF }'
 
-  #1.6.2 Ensure SELinux is installed
-  #rpm -q libselinux
+  rpm -q libselinux
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 1.6.2 Ensure SELinux is installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 1.6.2 Ensure SELinux is installed [${fail}${out}${end}]"
+  fi
+  echo "1.6.2, Ensure SELinux is installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   echo -e "\n${good}1.7 Warning Banners${end}\n"
 
@@ -554,27 +594,113 @@ checkL1() {
     $slp
   fi
 
-  #1.8 Ensure updates, patches, and additional security software are installed
-  #yum check-update --security
+  echo -e "\n${good}Check Security updates${end}\n"
+  yum check-update --security
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 1.8 Ensure updates, patches, and additional security software are installed [${fail}! MANUAL !${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 1.8 Ensure updates, patches, and additional security software are installed [${passed}! MANUAL !${end}]"
+    counter=$((counter+1))
+  fi
+  echo "1.8, Ensure updates, patches, and additional security software are installed, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
 
   echo -e "\n${good}2. Services${end}\n2.1 Special Purpose Services\n"
 
-  #2.1.1.1 Ensure time synchronization is in use
-  # rpm -q ntp
-# rpm -q chrony
+  rpm -q ntp > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    rpm -q chrony > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 2.1.1.1 Ensure time synchronization is in use [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 2.1.1.1 Ensure time synchronization is in use [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 2.1.1.1 Ensure time synchronization is in use [${fail}${out}${end}]"
+  fi
+  echo "2.1.1.1, Ensure time synchronization is in use, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.1.1.2 Ensure ntp is configured
-  #grep "^restrict" /etc/ntp.conf
-  # grep "^(server|pool)" /etc/ntp.conf
-  # grep "^OPTIONS" /etc/sysconfig/ntpd
-  # grep "^ExecStart" /usr/lib/systemd/system/ntpd.service
+  if [ -f "/etc/ntp.conf" ] && [ -f "/etc/sysconfig/ntpd" ];then
+    grep "^restrict" /etc/ntp.conf > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      grep "^(server|pool)" /etc/ntp.conf > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        grep "^OPTIONS" /etc/sysconfig/ntpd > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            grep "^ExecStart" /usr/lib/systemd/system/ntpd.service > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+              local out="PASS"
+              echo -e "${good} 2.1.1.2 Ensure ntp is configured [${passed}${out}${end}]"
+              counter=$((counter+1))
+            else
+              local out="FAIL"
+              echo -e "${bad} 2.1.1.2 Ensure ntp is configured [${fail}${out}${end}]"
+            fi
+        else
+          local out="FAIL"
+          echo -e "${bad} 2.1.1.2 Ensure ntp is configured [${fail}${out}${end}]"
+        fi
+      else
+        local out="FAIL"
+        echo -e "${bad} 2.1.1.2 Ensure ntp is configured [${fail}${out}${end}]"
+      fi
+    else
+      local out="FAIL"
+      echo -e "${bad} 2.1.1.2 Ensure ntp is configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 2.1.1.2 Ensure ntp is configured [${fail}${out}${end}]"
+  fi
+  echo "2.1.1.2, Ensure ntp is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.1.1.3 Ensure chrony is configured
-  #grep "^(server|pool)" /etc/chrony.conf
-  #grep ^OPTIONS /etc/sysconfig/chronyd
+  if [ -f "/etc/chrony.conf" ] && [ -f "/etc/sysconfig/chronyd" ];then
+    grep "^(server|pool)" /etc/chrony.conf > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      grep ^OPTIONS /etc/sysconfig/chronyd > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        local out="PASS"
+        echo -e "${good} 2.1.1.3 Ensure chrony is configured [${passed}${out}${end}]"
+        counter=$((counter+1))
+      else
+        local out="FAIL"
+        echo -e "${bad} 2.1.1.3 Ensure chrony is configured [${fail}${out}${end}]"
+      fi
+    else
+      local out="FAIL"
+      echo -e "${bad} 2.1.1.3 Ensure chrony is configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 2.1.1.3 Ensure chrony is configured [${fail}${out}${end}]"
+  fi
+  echo "2.1.1.3, Ensure chrony is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.1.2 Ensure X Window System is not installed
-  # rpm -qa xorg-x11*
+  rpm -qa xorg-x11* > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.1.2 Ensure X Window System is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.1.2 Ensure X Window System is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.1.2, Ensure X Window System is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   systemctl is-enabled avahi-daemon > /dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -853,20 +979,70 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  #2.2.1 Ensure NIS Client is not installed
-  #rpm -q ypbind
+  rpm -q ypbind > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.2.1 Ensure NIS Client is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.2.1 Ensure NIS Client is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.2.1, Ensure NIS Client is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.2.2 Ensure rsh client is not installed
-  #rpm -q rsh
+  rpm -q rsh > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.2.2 Ensure rsh client is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.2.2 Ensure rsh client is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.2.2, Ensure rsh client is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.2.3 Ensure talk client is not installed
-  # rpm -q talk
+  rpm -q talk > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.2.3 Ensure talk client is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.2.3 Ensure talk client is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.2.3, Ensure talk client is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.2.4 Ensure telnet client is not installed
-  #rpm -q telnet
+  rpm -q telnet > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.2.4 Ensure telnet client is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.2.4 Ensure telnet client is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.2.4, Ensure telnet client is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
-  #2.2.5 Ensure LDAP client is not installed
-  #rpm -q openldap-clients
+  rpm -q openldap-clients > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 2.2.5 Ensure LDAP client is not installed [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 2.2.5 Ensure LDAP client is not installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "2.2.5, Ensure LDAP client is not installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
   echo -e "\n${good}3. Network Configuration${end}\n"
 
