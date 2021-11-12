@@ -10,6 +10,14 @@
 #final benchmark score.
 #
 
+function scape() {  # Catch the ctrl_c INT key
+  echo -e "\n\n[+] Exiting ..."
+  tput cnorm
+  exit
+}
+
+trap scape INT
+
 banner() {
   echo "     ██████╗██╗███████╗               █████╗ ██╗     ██████╗ ";
   echo "    ██╔════╝██║██╔════╝              ██╔══██╗██║     ╚════██╗";
@@ -27,7 +35,7 @@ fail="\e[1m\e[91m"
 end="\e[0m"
 good="[\e[92m+${end}]"
 bad="[\e[91m-${end}]"
-slp="sleep 0.2"
+slp="sleep 0.0"
 
 getTime() {
   local datestamp
@@ -40,6 +48,21 @@ initCSV() {
   report="/tmp/CIS-report.csv"
   touch $report
   echo $content > $report
+}
+
+checkEnviroment() {
+  if [ "$EUID" -ne 0 ];then
+    echo -e "! This script must be run as root !\nYou can run as another user yet, but you will need sudo rights and results may be incorrect"
+    local COUNT; COUNT=10
+    while [ $COUNT -gt 0 ]; do
+      tput sc;tput civis
+        printf "Continue in: $COUNT"
+        sleep 1s
+      tput rc;tput el;tput cnorm
+        COUNT=$((COUNT-1))
+    done
+  exit
+fi
 }
 
 checkL1() {
@@ -2276,7 +2299,8 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  loglevel=$(sshd -T | grep loglevel | cut -d ' ' -f 2)
+  local loglevel;
+  loglevel=$(sshd -T 2>/dev/null | grep "loglevel" | cut -d ' ' -f 2)
   if [ "$loglevel" == "VERBOSE" ] || [ "$loglevel" == "INFO" ];then
     local out="PASS"
     echo -e "${good} 5.2.5 Ensure SSH LogLevel is appropriate [${passed}${out}${end}]"
@@ -2289,7 +2313,8 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  x11forward=$(sshd -T | grep x11forwarding | cut -d ' ' -f 2)
+  local x11forward;
+  x11forward=$(sshd -T 2>/dev/null | grep "x11forwarding" | cut -d ' ' -f 2)
   if [ "$x11forward" == "no" ];then
     local out="PASS"
     echo -e "${good} 5.2.6 Ensure SSH X11 forwarding is disabled [${passed}${out}${end}]"
@@ -2302,33 +2327,133 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  local maxauthtries;
+  maxauthtries=$(sshd -T 2>/dev/null | grep "x11forwarding" | cut -d ' ' -f 2)
+  if [[ $maxauthtries -le 4 ]];then
+    local out="PASS"
+    echo -e "${good} 5.2.7 Ensure SSH MaxAuthTries is set to 4 or less [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.7 Ensure SSH MaxAuthTries is set to 4 or less [${fail}${out}${end}]"
+  fi
+  echo "5.2.7, Ensure SSH MaxAuthTries is set to 4 or less, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local ignorerhosts;
+  ignorerhosts=$(sshd -T 2>/dev/null | grep "ignorerhosts" | cut -d ' ' -f 2)
+  if [ "$ignorerhosts" == "yes" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.8 Ensure SSH IgnoreRhosts is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.8 Ensure SSH IgnoreRhosts is enabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.8, Ensure SSH IgnoreRhosts is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local hostbasedauthentication;
+  hostbasedauthentication=$(sshd -T 2>/dev/null | grep "hostbasedauthentication" | cut -d ' ' -f 2)
+  if [ "$hostbasedauthentication" == "no" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.9 Ensure SSH HostbasedAuthentication is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.9 Ensure SSH HostbasedAuthentication is disabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.9, Ensure SSH HostbasedAuthentication is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local permitrootlogin;
+  permitrootlogin=$(sshd -T 2>/dev/null | grep "permitrootlogin" | cut -d ' ' -f 2)
+  if [ "$permitrootlogin" == "no" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.10 Ensure SSH root login is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.10 Ensure SSH root login is disabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.10, Ensure SSH root login is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local permitemptypasswords;
+  permitemptypasswords=$(sshd -T 2>/dev/null | grep "permitemptypasswords" | cut -d ' ' -f 2)
+  if [ "$permitemptypasswords" == "no" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.11 Ensure SSH PermitEmptyPasswords is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.11 Ensure SSH PermitEmptyPasswords is disabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.11, Ensure SSH PermitEmptyPasswords is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local permituserenvironment;
+  permituserenvironment=$(sshd -T 2>/dev/null | grep "permituserenvironment" | cut -d ' ' -f 2)
+  if [ "$permituserenvironment" == "no" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.12 Ensure SSH PermitUserEnvironment is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.12 Ensure SSH PermitUserEnvironment is disabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.12, Ensure SSH PermitUserEnvironment is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.2.13 Ensure only strong ciphers are used [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.2.13, Ensure only strong ciphers are used, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.2.14 Ensure only strong MAC algorithms are used [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.2.14, Ensure only strong MAC algorithms are used, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.2.15 Ensure that strong Key Exchange algorithms are used [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.2.15, Ensure that strong Key Exchange algorithms are used, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  local timeout;local maxclients
+  timeout=$(sudo sshd -T 2>/dev/null| grep clientaliveinterval | cut -d ' ' -f 2)
+  maxclients=$(sudo sshd -T 2>/dev/null| grep clientalivecountmax | cut -d ' ' -f 2)
+  if [ "$timeout" -gt 0 ] && [ "$timeout" -le 300 ] && [ "$maxclients" -le 3 ];then
+    local out="PASS"
+    echo -e "${good} 5.2.16 Ensure SSH Idle Timeout Interval is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.16 Ensure SSH Idle Timeout Interval is configured [${fail}${out}${end}]"
+  fi
+  echo "5.2.16, Ensure SSH Idle Timeout Interval is configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# vamos por la 306 !!1
 
   echo $checks
   echo $counter
-
-
 }
 
 banner
+checkEnviroment
 initCSV
 checkL1
 
