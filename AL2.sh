@@ -326,7 +326,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled autofs > /dev/null 2>&1
+  sudo systemctl is-enabled autofs > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 1.1.19 Disable Automounting [${passed}${out}${end}]"
@@ -631,7 +631,7 @@ checkL1() {
     echo -e "${good} 1.8 Ensure updates, patches, and additional security software are installed [${passed}! MANUAL !${end}]"
     counter=$((counter+1))
   fi
-  echo "1.8, Ensure updates, patches, and additional security software are installed, MANUAL" >> $report
+  echo "1.8, Ensure updates patches and additional security software are installed, MANUAL" >> $report
   checks=$((checks+1))
   $slp
 
@@ -729,7 +729,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled avahi-daemon > /dev/null 2>&1
+  sudo systemctl is-enabled avahi-daemon > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.3 Ensure Avahi Server is not enabled [${fail}${out}${end}]"
@@ -742,7 +742,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled cups > /dev/null 2>&1
+  sudo systemctl is-enabled cups > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.4 Ensure CUPS is not enabled [${fail}${out}${end}]"
@@ -755,7 +755,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled dhcpd > /dev/null 2>&1
+  sudo systemctl is-enabled dhcpd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.5 Ensure DHCP Server is not enabled [${fail}${out}${end}]"
@@ -768,7 +768,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled slapd > /dev/null 2>&1
+  sudo systemctl is-enabled slapd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.6 Ensure LDAP server is not enabled [${fail}${out}${end}]"
@@ -781,17 +781,17 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled nfs > /dev/null 2>&1
+  sudo systemctl is-enabled nfs > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
   else
-    systemctl is-enabled nfs-server > /dev/null 2>&1
+    sudo systemctl is-enabled nfs-server > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       local out="FAIL"
       echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
     else
-      systemctl is-enabled rpcbind > /dev/null 2>&1
+      sudo systemctl is-enabled rpcbind > /dev/null 2>&1
       if [ $? -eq 0 ]; then
         local out="FAIL"
         echo -e "${bad} 2.1.7 Ensure NFS and RPC are not enabled [${fail}${out}${end}]"
@@ -806,7 +806,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled named > /dev/null 2>&1
+  sudo systemctl is-enabled named > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.8 Ensure DNS Server is not enabled [${fail}${out}${end}]"
@@ -819,7 +819,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled vsftpd > /dev/null 2>&1
+  sudo systemctl is-enabled vsftpd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.9 Ensure FTP Server is not enabled [${fail}${out}${end}]"
@@ -832,12 +832,12 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled httpd > /dev/null 2>&1
+  sudo systemctl is-enabled httpd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.10 Ensure HTTP server is not enabled [${fail}${out}${end}]"
   else
-    systemctl is-enabled apache2 > /dev/null 2>&1
+    sudo systemctl is-enabled apache2 > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       local out="FAIL"
       echo -e "${bad} 2.1.10 Ensure HTTP server is not enabled [${fail}${out}${end}]"
@@ -851,7 +851,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled dovecot > /dev/null 2>&1
+  sudo systemctl is-enabled dovecot > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.11 Ensure IMAP and POP3 server is not enabled [${fail}${out}${end}]"
@@ -864,7 +864,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled smb > /dev/null 2>&1
+  sudo systemctl is-enabled smb > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.12 Ensure Samba is not enabled [${fail}${out}${end}]"
@@ -877,7 +877,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled squid > /dev/null 2>&1
+  sudo systemctl is-enabled squid > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.13 Ensure HTTP Proxy Server is not enabled [${fail}${out}${end}]"
@@ -890,7 +890,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled snmpd > /dev/null 2>&1
+  sudo systemctl is-enabled snmpd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.14 Ensure SNMP Server is not enabled [${fail}${out}${end}]"
@@ -916,7 +916,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled ypserv > /dev/null 2>&1
+  sudo systemctl is-enabled ypserv > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.16 Ensure NIS Server is not enabled [${fail}${out}${end}]"
@@ -929,17 +929,17 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled rsh.socket > /dev/null 2>&1
+  sudo systemctl is-enabled rsh.socket > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
   else
-     systemctl is-enabled rlogin.socket > /dev/null 2>&1
+     sudo systemctl is-enabled rlogin.socket > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       local out="FAIL"
       echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
     else
-      systemctl is-enabled rexec.socket > /dev/null 2>&1
+      sudo systemctl is-enabled rexec.socket > /dev/null 2>&1
       if [ $? -eq 0 ]; then
         local out="FAIL"
         echo -e "${bad} 2.1.17 Ensure rsh server is not enabled [${fail}${out}${end}]"
@@ -954,7 +954,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled telnet.socket > /dev/null 2>&1
+  sudo systemctl is-enabled telnet.socket > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.18 Ensure telnet server is not enabled [${fail}${out}${end}]"
@@ -967,7 +967,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled tftp.socket > /dev/null 2>&1
+  sudo systemctl is-enabled tftp.socket > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.19 Ensure tftp server is not enabled [${fail}${out}${end}]"
@@ -980,7 +980,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled rsyncd > /dev/null 2>&1
+  sudo systemctl is-enabled rsyncd > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.20 Ensure rsync service is not enabled [${fail}${out}${end}]"
@@ -993,7 +993,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled ntalk > /dev/null 2>&1
+  sudo systemctl is-enabled ntalk > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 2.1.21 Ensure talk server is not enabled [${fail}${out}${end}]"
@@ -1520,7 +1520,7 @@ checkL1() {
   $slp
 
   echo -e "${bad} 3.5.2.3 Ensure IPv6 outbound and established connections are configured  [${fail}! MANUAL !${end}]"
-  echo "3.5.2.3 Ensure IPv6 outbound and established connections are configured, MANUAL" >> $report
+  echo "3.5.2.3, Ensure IPv6 outbound and established connections are configured, MANUAL" >> $report
   checks=$((checks+1))
   $slp
 
@@ -1543,9 +1543,274 @@ checkL1() {
   $slp
 
   echo -e "${bad} 3.6 Disable IPv6 [${fail}! MANUAL !${end}]"
-  echo "3.6 Disable IPv63.6 Disable IPv6. MANUAL" >> $report
+  echo "3.6, Disable IPv63.6 Disable IPv6, MANUAL" >> $report
   checks=$((checks+1))
   $slp
+
+  echo -e "\n${good}4. Logging and Auditing${end}\nConfiguring System Accounting (auditID)"
+
+  sudo service auditd reload > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 4.1 Configure System Accounting. auditid appears to be uninstalled. [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 4.1 Configure System Accounting [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+
+  grep "max_log_file" /etc/audit/auditd.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.1.1 Ensure audit log storage size is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.1.1 Ensure audit log storage size is configured [${fail}${out}${end}]"
+  fi
+  echo "4.1.1.1, Ensure audit log storage size is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "space_left_action" /etc/audit/auditd.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    grep "action_mail_acct" /etc/audit/auditd.conf > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      grep "admin_space_left_action" /etc/audit/auditd.conf > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        local out="PASS"
+        echo -e "${good} 4.1.1.2 Ensure system is disabled when audit logs are full [${passed}${out}${end}]"
+        counter=$((counter+1))
+      else
+        local out="FAIL"
+        echo -e "${bad} 4.1.1.2 Ensure system is disabled when audit logs are full [${fail}${out}${end}]"
+      fi
+    else
+      local out="FAIL"
+      echo -e "${bad} 4.1.1.2 Ensure system is disabled when audit logs are full [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.1.2 Ensure system is disabled when audit logs are full [${fail}${out}${end}]"
+  fi
+  echo "4.1.1.2, Ensure system is disabled when audit logs are full, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "max_log_file_action" /etc/audit/auditd.conf | grep "keep_logs" > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.1.3 Ensure audit logs are not automatically deleted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.1.3 Ensure audit logs are not automatically deleted [${fail}${out}${end}]"
+  fi
+  echo "4.1.1.3, Ensure audit logs are not automatically deleted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sudo systemctl is-enabled auditd > /dev/null 2>&1
+  grep "max_log_file_action" /etc/audit/auditd.conf | grep "keep_logs" > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.2 Ensure auditd service is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.2 Ensure auditd service is enabled [${fail}${out}${end}]"
+  fi
+  echo "4.1.2, Ensure auditd service is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  if test -f "/boot/grub2/grub.cfg"; then
+    grep "^\s*linux" /boot/grub/grub.cfg | grep 'audit=1'
+    if [ $? -eq 0 ];then
+      local out="PASS"
+      echo -e "${good} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${fail}${out}${end}]"
+    fi
+  elif test -f "/boot/grub/grub.cfg"; then
+    grep "^\s*linux" /boot/grub2/grub.cfg | grep 'audit=1'
+    if [ $? -eq 0 ];then
+      local out="PASS"
+      echo -e "${good} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${fail}${out}${end}]"
+  fi
+
+  grep "time-change" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.4 Ensure events that modify date and time information are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.4 Ensure events that modify date and time information are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.4, Ensure events that modify date and time information are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "identity" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.5 Ensure events that modify user/group information are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.5 Ensure events that modify user/group information are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.5, Ensure events that modify user/group information are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "system-locale" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.6 Ensure events that modify the systems network environment are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.6 Ensure events that modify the systems network environment are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.6, Ensure events that modify the systems network environment are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "MAC-policy" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.7 Ensure events that modify the systems Mandatory Access Controls are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.7 Ensure events that modify the systems Mandatory Access Controls are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.7, Ensure events that modify the systems Mandatory Access Controls are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "logins" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.8 Ensure login and logout events are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.8 Ensure login and logout events are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.8, Ensure login and logout events are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+   grep "session" /etc/audit/audit.rules > /dev/null 2>&1
+   if [ $? -eq 0 ]; then
+    grep logins /etc/audit/audit.rules
+    if [ $? -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 4.1.9 Ensure session initiation information is collected [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 4.1.9 Ensure session initiation information is collected [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.9 Ensure session initiation information is collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.9, Ensure session initiation information is collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "perm_mod" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.10 Ensure discretionary access control permission modification events are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.10 Ensure discretionary access control permission modification events are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.10, Ensure discretionary access control permission modification events are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "access" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.11 Ensure unsuccessful unauthorized file access attempts are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.11 Ensure unsuccessful unauthorized file access attempts are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.11, Ensure unsuccessful unauthorized file access attempts are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 4.1.12 Ensure use of privileged commands is collected [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "4.1.12, Ensure use of privileged commands is collected, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "mounts" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.13 Ensure successful file system mounts are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.13 Ensure successful file system mounts are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.13, Ensure successful file system mounts are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "delete" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.14 Ensure file deletion events by users are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.14 Ensure file deletion events by users are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.14, Ensure file deletion events by users are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "scope" /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.15 Ensure changes to system administration scope sudoers is collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.15 Ensure changes to system administration scope sudoers is collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.15, Ensure changes to system administration scope sudoers is collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
+
+
+
 
 
 
