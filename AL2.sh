@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# VOY POR LA PAGINA 51
 #Scored
 #Failure to comply with "Scored" recommendations will decrease the final benchmark score.
 #Compliance with "Scored" recommendations will increase the final benchmark score.
@@ -380,7 +379,7 @@ checkL1() {
 
   if test -f "/boot/grub2/grub.cfg"; then
     uid=$(stat /boot/grub2/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
-    gid=$(stat /boot/grub2/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /boot/grub2/grub.cfg | grep 'Uid' | awk '{print $9}' | tr -d '/')
     if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
       local out="PASS"
       echo -e "${good} 1.4.1 Ensure permissions on bootloader config are configured [${passed}${out}${end}]"
@@ -395,7 +394,7 @@ checkL1() {
   fi
   if test -f "/boot/grub/grub.cfg"; then
     uid=$(stat /boot/grub/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
-    gid=$(stat /boot/grub/grub.cfg | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /boot/grub/grub.cfg | grep 'Uid' | awk '{print $9}' | tr -d '/')
     if [ $? -eq 0 ]; then
       local out="PASS"
       echo -e "${good} 1.4.1 Ensure permissions on bootloader config are configured [${passed}${out}${end}]"
@@ -575,7 +574,7 @@ checkL1() {
 
   if test -f "/etc/motd"; then
     uid=$(stat /etc/motd | grep 'Uid' | awk '{print $5}' | tr -d '/')
-    gid=$(stat /etc/motd | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/motd | grep 'Uid' | awk '{print $9}' | tr -d '/')
     if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
       local out="PASS"
       echo -e "${good} 1.7.1.4 Ensure permissions on /etc/motd are configured [${passed}${out}${end}]"
@@ -591,7 +590,7 @@ checkL1() {
 
   if test -f "/etc/issue"; then
     uid=$(stat /etc/issue | grep 'Uid' | awk '{print $5}' | tr -d '/')
-    gid=$(stat /etc/issue | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/issue | grep 'Uid' | awk '{print $9}' | tr -d '/')
     if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
       local out="PASS"
       echo -e "${good} 1.7.1.5 Ensure permissions on /etc/issue are configured [${passed}${out}${end}]"
@@ -607,7 +606,7 @@ checkL1() {
 
   if test -f "/etc/issue.net"; then
     uid=$(stat /etc/issue.net | grep 'Uid' | awk '{print $5}' | tr -d '/')
-    gid=$(stat /etc/issue.net | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat /etc/issue.net | grep 'Uid' | awk '{print $9}' | tr -d '/')
     if [ $uid -eq 0 ] && [ $gid -eq 0 ]; then
       local out="PASS"
       echo -e "${good} 1.7.1.6 Ensure permissions on /etc/issue.net are configured [${passed}${out}${end}]"
@@ -1394,7 +1393,7 @@ checkL1() {
   $slp
 
   uid=$(stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
-  gid=$(stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/hosts.allow | grep 'Uid' | awk '{print $9}' | tr -d '/')
   if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 3.3.4 Ensure permissions on /etc/hosts.allow are configured [${passed}${out}${end}]"
@@ -1408,7 +1407,7 @@ checkL1() {
   $slp
 
   uid=$(stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
-  gid=$(stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/hosts.deny | grep 'Uid' | awk '{print $9}' | tr -d '/')
   if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 3.3.5 Ensure permissions on /etc/hosts.deny are configured [${passed}${out}${end}]"
@@ -1597,7 +1596,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  grep "max_log_file_action" /etc/audit/auditd.conf | grep "keep_logs" > /dev/null 2>&1
+  grep "max_log_file_action" /etc/audit/auditd.conf > /dev/null 2>&1 | grep "keep_logs" > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 4.1.1.3 Ensure audit logs are not automatically deleted [${passed}${out}${end}]"
@@ -1611,7 +1610,6 @@ checkL1() {
   $slp
 
   sudo systemctl is-enabled auditd > /dev/null 2>&1
-  grep "max_log_file_action" /etc/audit/auditd.conf | grep "keep_logs" > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 4.1.2 Ensure auditd service is enabled [${passed}${out}${end}]"
@@ -1625,7 +1623,7 @@ checkL1() {
   $slp
 
   if test -f "/boot/grub2/grub.cfg"; then
-    grep "^\s*linux" /boot/grub/grub.cfg | grep 'audit=1'
+    grep "^\s*linux" /boot/grub2/grub.cfg | grep 'audit=1'
     if [ $? -eq 0 ];then
       local out="PASS"
       echo -e "${good} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${passed}${out}${end}]"
@@ -1635,7 +1633,7 @@ checkL1() {
       echo -e "${bad} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${fail}${out}${end}]"
     fi
   elif test -f "/boot/grub/grub.cfg"; then
-    grep "^\s*linux" /boot/grub2/grub.cfg | grep 'audit=1'
+    grep "^\s*linux" /boot/grub/grub.cfg | grep 'audit=1'
     if [ $? -eq 0 ];then
       local out="PASS"
       echo -e "${good} 4.1.3 Ensure auditing for processes that start prior to auditd is enabled [${passed}${out}${end}]"
@@ -1830,7 +1828,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  grep "^\s*[^#]" /etc/audit/audit.rules | grep '-e 2' > /dev/null 2>&1
+  grep "^\s*[^#]" /etc/audit/audit.rules > /dev/null 2>&1 | grep '-e 2' > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 4.1.18 Ensure the audit configuration is immutable [${passed}${out}${end}]"
@@ -1928,7 +1926,7 @@ checkL1() {
   $slp
 
   var1=$(ls -l /var/log | head -1 | awk '{print $2}')
-  if [ $var1 -gt 0 ];then
+  if [ "$var1" -gt 0 ];then
     local out="PASS"
     echo -e "${good} 4.2.2.2 Ensure logging is configured [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -1940,7 +1938,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  grep "^options" /etc/syslog-ng/syslog-ng.conf | grep '0640' > /dev/null 2>&1
+  grep "^options" /etc/syslog-ng/syslog-ng.conf > /dev/null 2>&1 | grep '0640' > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 4.2.2.3 Ensure syslog-ng default file permissions configured [${passed}${out}${end}]"
@@ -1991,31 +1989,318 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  4.2.4 Ensure permissions on all logfiles are configured
+  local archivo;local other;local groups;local cother;local cgroups
+  cother=0;cgroups=0
   while IFS= read -r line
   do
     archivo=$line
     other=$(stat -c "%a" $line | cut -c 3)
     groups=$(stat -c "%a" $line | cut -c 2)
     if [ $other -gt 0 ];then
-        #echo "$archivo has other permissions"
+        cother=$((cother+1))
     fi
     if [ $groups -gt 4 ];then
-        echo "$archivo has permissive groups access"
+        cgroups=$((cgroups+1))
     fi
   done < <(find /var/log -type f 2>/dev/null)
-while IFS= read -r line
+  if [ $cother -eq 0 ] && [ $cgroups -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 4.2.4 Ensure permissions on all logfiles are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.4 Ensure permissions on all logfiles are configured [${fail}${out}${end}]"
+  fi
+  echo "4.2.4, Ensure permissions on all logfiles are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 4.3 Ensure logrotate is configured [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "4.3, Ensure logrotate is configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "\n${good}5 Access, Authentication and Authorization${end}\n5.1 Configure cron"
+
+  systemctl is-enabled crond > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 5.1.1 Ensure cron daemon is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.1 Ensure cron daemon is enabled [${fail}${out}${end}]"
+  fi
+  echo "5.1.1, Ensure cron daemon is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/crontab | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/crontab | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/crontab | cut -c 3)
+    groups=$(stat -c "%a" /etc/crontab | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.2 Ensure permissions on /etc/crontab are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.2 Ensure permissions on /etc/crontab are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.2 Ensure permissions on /etc/crontab are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.2, Ensure permissions on /etc/crontab are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/cron.hourly | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/cron.hourly | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/cron.hourly | cut -c 3)
+    groups=$(stat -c "%a" /etc/cron.hourly | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.3 Ensure permissions on /etc/cron.hourly are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.3 Ensure permissions on /etc/cron.hourly are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.3 Ensure permissions on /etc/cron.hourly are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.3, Ensure permissions on /etc/cron.hourly are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/cron.daily | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/cron.daily | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/cron.daily | cut -c 3)
+    groups=$(stat -c "%a" /etc/cron.daily | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.4 Ensure permissions on /etc/cron.daily are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.4 Ensure permissions on /etc/cron.daily are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.4 Ensure permissions on /etc/cron.daily are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.4, Ensure permissions on /etc/cron.daily are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/cron.weekly | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/cron.weekly | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/cron.weekly | cut -c 3)
+    groups=$(stat -c "%a" /etc/cron.weekly | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.5 Ensure permissions on /etc/cron.weekly are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.5 Ensure permissions on /etc/cron.weekly are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.5 Ensure permissions on /etc/cron.weekly are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.5, Ensure permissions on /etc/cron.weekly are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/cron.monthly | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/cron.monthly | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/cron.monthly | cut -c 3)
+    groups=$(stat -c "%a" /etc/cron.monthly | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.6 Ensure permissions on /etc/cron.monthly are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.6 Ensure permissions on /etc/cron.monthly are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.6 Ensure permissions on /etc/cron.monthly are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.6, Ensure permissions on /etc/cron.monthly are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/cron.d | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/cron.d | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/cron.d | cut -c 3)
+    groups=$(stat -c "%a" /etc/cron.d | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.1.7 Ensure permissions on /etc/cron.d are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.7 Ensure permissions on /etc/cron.d are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.1.7 Ensure permissions on /etc/cron.d are configured [${fail}${out}${end}]"
+  fi
+  echo "5.1.7, Ensure permissions on /etc/cron.d are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  if test -f "/etc/cron.deny"; then
+    local out="FAIL"
+    echo -e "${bad} 5.1.7 Ensure permissions on /etc/cron.d are configured [${fail}${out}${end}]"
+  else
+    if test -f "/etc/at.deny"; then
+      uid=$(stat /etc/cron.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+      gid=$(stat /etc/cron.allow | grep 'Uid' | awk '{print $9}' | tr -d '/')
+      if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+        other=$(stat -c "%a" /etc/cron.allow | cut -c 3)
+        groups=$(stat -c "%a" /etc/cron.allow | cut -c 2)
+        if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+          uid=$(stat /etc/at.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+          gid=$(stat /etc/at.allow | grep 'Uid' | awk '{print $9}' | tr -d '/')
+          if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+            other=$(stat -c "%a" /etc/at.allow | cut -c 3)
+            groups=$(stat -c "%a" /etc/at.allow | cut -c 2)
+            if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+              local out="PASS"
+              echo -e "${good} 5.1.8 Ensure at/cron is restricted to authorized users [${passed}${out}${end}]"
+              counter=$((counter+1))
+            else
+              local out="FAIL"
+              echo -e "${bad} 5.1.8 Ensure at/cron is restricted to authorized users [${fail}${out}${end}]"
+            fi
+          else
+            local out="FAIL"
+            echo -e "${bad} 5.1.8 Ensure at/cron is restricted to authorized users [${fail}${out}${end}]"
+          fi
+        else
+          local out="FAIL"
+          echo -e "${bad} 5.1.8 Ensure at/cron is restricted to authorized users [${fail}${out}${end}]"
+        fi
+      else
+        local out="FAIL"
+        echo -e "${bad} 5.1.8 Ensure at/cron is restricted to authorized users [${fail}${out}${end}]"
+      fi
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.1.8 Ensure at/cron is restricted to authorized users [${fail}${out}${end}]"
+    fi
+  fi
+  echo "5.1.8, Ensure at/cron is restricted to authorized users, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/ssh/sshd_config | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/ssh/sshd_config | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    other=$(stat -c "%a" /etc/ssh/sshd_config | cut -c 3)
+    groups=$(stat -c "%a" /etc/ssh/sshd_config | cut -c 2)
+    if [ "$other" -eq 0 ] && [ "$groups" -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured [${fail}${out}${end}]"
+  fi
+  echo "5.2.1, Ensure permissions on /etc/ssh/sshd_config are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  while IFS= read -r line
   do
+    uid=$(stat $line | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat $line | grep 'Uid' | awk '{print $9}' | tr -d '/')
     archivo=$line
     other=$(stat -c "%a" $line | cut -c 3)
     groups=$(stat -c "%a" $line | cut -c 2)
-    if [ $other -gt 0 ];then
-        #echo "$archivo has other permissions"
-    fi
-    if [ $groups -gt 4 ];then
-        echo "$archivo has permissive groups access"
-    fi
-  done < <(find /var/log -type f 2>/dev/null)
+    count=$((uid+gid+other+groups))
+  done < <(find /etc/ssh -xdev -type f -name 'ssh_host_*_key')
+  if [ $count -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 5.2.2 Ensure permissions on SSH private host key files are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.2 Ensure permissions on SSH private host key files are configured [${fail}${out}${end}]"
+  fi
+  echo "5.2.2, Ensure permissions on SSH private host key files are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  while IFS= read -r line
+  do
+    uid=$(stat "$line" | grep 'Uid' | awk '{print $5}' | tr -d '/')
+    gid=$(stat "$line" | grep 'Uid' | awk '{print $9}' | tr -d '/')
+    archivo=$line
+    other=$(stat -c "%a" "$line" | cut -c 3)
+    groups=$(stat -c "%a" "$line" | cut -c 2)
+    count=$((uid+gid+other+groups))
+  done < <(find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub')
+  if [ $count -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 5.2.3 Ensure permissions on SSH public host key files are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.3 Ensure permissions on SSH public host key files are configured [${fail}${out}${end}]"
+  fi
+  echo "5.2.3, Ensure permissions on SSH public host key files are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.2.4 Ensure SSH Protocol is set to 2 [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.2.4, Ensure SSH Protocol is set to 2, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  loglevel=$(sshd -T | grep loglevel | cut -d ' ' -f 2)
+  if [ "$loglevel" == "VERBOSE" ] || [ "$loglevel" == "INFO" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.5 Ensure SSH LogLevel is appropriate [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.5 Ensure SSH LogLevel is appropriate [${fail}${out}${end}]"
+  fi
+  echo "5.2.5, Ensure SSH LogLevel is appropriate, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  x11forward=$(sshd -T | grep x11forwarding | cut -d ' ' -f 2)
+  if [ "$x11forward" == "no" ];then
+    local out="PASS"
+    echo -e "${good} 5.2.6 Ensure SSH X11 forwarding is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.6 Ensure SSH X11 forwarding is disabled [${fail}${out}${end}]"
+  fi
+  echo "5.2.6, Ensure SSH X11 forwarding is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
 
 
