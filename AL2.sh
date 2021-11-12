@@ -2432,7 +2432,7 @@ checkL1() {
   local timeout;local maxclients
   timeout=$(sudo sshd -T 2>/dev/null| grep clientaliveinterval | cut -d ' ' -f 2)
   maxclients=$(sudo sshd -T 2>/dev/null| grep clientalivecountmax | cut -d ' ' -f 2)
-  if [ "$timeout" -gt 0 ] && [ "$timeout" -le 300 ] && [ "$maxclients" -le 3 ];then
+  if [[ "$timeout" -gt 0 ]] && [[ "$timeout" -le 300 ]] && [[ "$maxclients" -le 3 ]];then
     local out="PASS"
     echo -e "${good} 5.2.16 Ensure SSH Idle Timeout Interval is configured [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -2440,9 +2440,160 @@ checkL1() {
     local out="FAIL"
     echo -e "${bad} 5.2.16 Ensure SSH Idle Timeout Interval is configured [${fail}${out}${end}]"
   fi
-  echo "5.2.16, Ensure SSH Idle Timeout Interval is configured, MANUAL" >> $report
+  echo "5.2.16, Ensure SSH Idle Timeout Interval is configured, $out" >> $report
   checks=$((checks+1))
   $slp
+
+  var1=$(sshd -T | grep logingracetime | cut -d ' ' -f)
+  if [[ "$var1" -gt 1 ]] && [[ "$var1" -le 60 ]];then
+    local out="PASS"
+    echo -e "${good} 5.2.17 Ensure SSH LoginGraceTime is set to one minute or less [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.17 Ensure SSH LoginGraceTime is set to one minute or less [${fail}${out}${end}]"
+  fi
+  echo "5.2.17, Ensure SSH LoginGraceTime is set to one minute or less, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sshd -T | grep allowusers > /dev/null 2>&1
+  var1=$(echo $?)
+  sshd -T | grep allowgroups > /dev/null 2>&1
+  var2=$(echo $?)
+  sshd -T | grep denyusers > /dev/null 2>&1
+  var3=$(echo $?)
+  shd -T | grep denygroups > /dev/null 2>&1
+  var4=$(echo $?)
+  var5=$((var1+var2+var3+var4))
+  if [ $var5 -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 5.2.18 Ensure SSH access is limited [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.18 Ensure SSH access is limited [${fail}${out}${end}]"
+  fi
+  echo "5.2.18, Ensure SSH access is limited, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sshd -T | grep banner | cut -d ' ' -f 2)
+  if [[ "$var1" != "none" ]];then
+    local out="PASS"
+    echo -e "${good} 5.2.19 Ensure SSH warning banner is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.2.19 Ensure SSH warning banner is configured [${fail}${out}${end}]"
+  fi
+  echo "5.2.19, Ensure SSH warning banner is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep pam_pwquality.so /etc/pam.d/password-auth > /dev/null 2>&1
+  if [ $? -eq 0 ];then
+    grep pam_pwquality.so /etc/pam.d/system-auth > /dev/null 2>&1
+    if [ $? -eq 0 ];then
+      var3=$(grep ^minlen /etc/security/pwquality.conf | cut -d = -f 2)
+      if [[ $var3 -ge 14 ]];then
+        grep ^dcredit /etc/security/pwquality.conf > /dev/null 2>&1
+        if [[ $? -eq 0 ]];then
+          local out="PASS"
+          echo -e "${good} 5.3.1 Ensure password creation requirements are configured [${passed}${out}${end}]"
+          counter=$((counter+1))
+        else
+          local out="FAIL"
+          echo -e "${bad} 5.3.1 Ensure password creation requirements are configured [${fail}${out}${end}]"
+        fi
+      else
+        local out="FAIL"
+        echo -e "${bad} 5.3.1 Ensure password creation requirements are configured [${fail}${out}${end}]"
+      fi
+    else
+      local out="FAIL"
+      echo -e "${bad} 5.3.1 Ensure password creation requirements are configured [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.3.1 Ensure password creation requirements are configured [${fail}${out}${end}]"
+  fi
+  echo "5.3.1, Ensure password creation requirements are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.3.2 Ensure lockout for failed password attempts is configured [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.3.2, Ensure lockout for failed password attempts is configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.3.3 Ensure password reuse is limited [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.3.3, Ensure password reuse is limited, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+  var1=$(grep -E '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth | awk '{print $4}' | cut -c 4-6)
+  if [[ "$var1" == "512" ]];then
+    local out="PASS"
+    echo -e "${good} 5.3.4 Ensure password hashing algorithm is SHA-512 [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.3.4 Ensure password hashing algorithm is SHA-512 [${fail}${out}${end}]"
+  fi
+  echo "5.3.4, Ensure password hashing algorithm is SHA-512, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(grep PASS_MAX_DAYS /etc/login.defs | grep -v '#' | awk '{print $2}')
+  if [ $var1 -le 365 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.1.1 Ensure password expiration is 365 days or less [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.1.1 Ensure password expiration is 365 days or less [${fail}${out}${end}]"
+  fi
+  echo "5.4.1.1, Ensure password expiration is 365 days or less, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=(grep PASS_MIN_DAYS /etc/login.defs | grep -v '#' | awk '{print $2}')
+  if [ $var1 -ge 7 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.1.2 Ensure minimum days between password changes is 7 or more [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.1.2 Ensure minimum days between password changes is 7 or more [${fail}${out}${end}]"
+  fi
+  echo "5.4.1.2, Ensure minimum days between password changes is 7 or more, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=(grep PASS_WARN_AGE /etc/login.defs | grep -v '#' | awk '{print $2}')
+  if [ $var1 -ge 7 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.1.3 Ensure password expiration warning days is 7 or more [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.1.3 Ensure password expiration warning days is 7 or more [${fail}${out}${end}]"
+  fi
+  echo "5.4.1.3, Ensure password expiration warning days is 7 or more, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
+
+
+
 
 
 
