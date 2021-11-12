@@ -326,7 +326,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  systemctl is-enabled autofs 2>/dev/null 2>&1
+  systemctl is-enabled autofs > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 1.1.19 Disable Automounting [${passed}${out}${end}]"
@@ -433,7 +433,7 @@ checkL1() {
 
   local aslr
   aslr=$(sysctl kernel.randomize_va_space | cut -d '=' -f 2 | sed 's/\s//g')
-  if [ "$alr" -eq 2 ]; then
+  if [ "$aslr" == "2" ]; then
     local out="PASS"
     echo -e "${good} 1.5.2 Ensure address space layout randomization (ASLR) is enabled [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -519,7 +519,7 @@ checkL1() {
   #1.6.1.6 Ensure no unconfined daemons exist
   #ps -eZ | egrep "initrc" | egrep -vw "tr|ps|egrep|bash|awk" | tr ':' ' ' | awk '{ print $NF }'
 
-  rpm -q libselinux
+  rpm -q libselinux > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 1.6.2 Ensure SELinux is installed [${passed}${out}${end}]"
@@ -622,7 +622,7 @@ checkL1() {
   fi
 
   echo -e "\n${good}Check Security updates${end}\n"
-  yum check-update --security
+  yum check-update --security > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     local out="FAIL"
     echo -e "${bad} 1.8 Ensure updates, patches, and additional security software are installed [${fail}! MANUAL !${end}]"
@@ -1281,8 +1281,8 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  var1=$(sysctl net.ipv4.conf.all.rp_filter)
-  var2=$(sysctl net.ipv4.conf.default.rp_filter)
+  var1=$(sysctl net.ipv4.conf.all.rp_filter | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv4.conf.default.rp_filter | cut -d = -f 2 | sed 's/\s//g')
 
   while IFS= read -r line
   do
@@ -1393,8 +1393,8 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  uid=$(stat stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
-  gid=$(stat stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  uid=$(stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
   if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 3.3.4 Ensure permissions on /etc/hosts.allow are configured [${passed}${out}${end}]"
@@ -1407,8 +1407,8 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  uid=$(stat stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
-  gid=$(stat stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  uid=$(stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
   if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
     local out="PASS"
     echo -e "${good} 3.3.5 Ensure permissions on /etc/hosts.deny are configured [${passed}${out}${end}]"
@@ -1472,6 +1472,89 @@ checkL1() {
   echo "3.4.4, Ensure TIPC is disabled, $out" >> $report
   checks=$((checks+1))
   $slp
+
+  sudo iptables -L | grep -E "INPUT|OUTPUT|FORWARD" | grep -E "DROP|REJECT" > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.5.1.1 Ensure default deny firewall policy [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.5.1.1 Ensure default deny firewall policy [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.5.1.1, Ensure default deny firewall policy, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.1.2 Ensure loopback traffic is configured [${fail}! MANUAL !${end}]"
+  echo "3.5.1.2, Ensure loopback traffic is configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.1.3 Ensure outbound and established connections are configured  [${fail}! MANUAL !${end}]"
+  echo "3.5.1.3, Ensure outbound and established connections are configured , MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.1.4 Ensure firewall rules exist for all open ports [${fail}! MANUAL !${end}]"
+  echo "3.5.1.4, Ensure firewall rules exist for all open ports, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sudo ip6tables -L | grep -E "INPUT|OUTPUT|FORWARD" | grep -E "DROP|REJECT" > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.5.2.1 Ensure IPv6 default deny firewall policy [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.5.2.1 Ensure IPv6 default deny firewall policy [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.5.2.1, Ensure IPv6 default deny firewall policy, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.2.2 Ensure IPv6 loopback traffic is configured [${fail}! MANUAL !${end}]"
+  echo "3.5.2.2, Ensure IPv6 loopback traffic is configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.2.3 Ensure IPv6 outbound and established connections are configured  [${fail}! MANUAL !${end}]"
+  echo "3.5.2.3 Ensure IPv6 outbound and established connections are configured, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.5.2.4 Ensure IPv6 firewall rules exist for all open ports [${fail}! MANUAL !${end}]"
+  echo "3.5.2.4, Ensure IPv6 firewall rules exist for all open ports. MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  rpm -q iptables > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.5.3 Ensure iptables is installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.5.3 Ensure iptables is installed [${fail}${out}${end}]"
+  fi
+  echo "3.5.3, Ensure iptables is installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${bad} 3.6 Disable IPv6 [${fail}! MANUAL !${end}]"
+  echo "3.6 Disable IPv63.6 Disable IPv6. MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
+
+
+
+
 
 
 
