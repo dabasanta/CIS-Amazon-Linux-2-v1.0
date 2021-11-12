@@ -1804,8 +1804,218 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  grep actions /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.16 Ensure system administrator actions (sudolog) are collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.16 Ensure system administrator actions (sudolog) are collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.16, Ensure system administrator actions (sudolog) are collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
+  grep modules /etc/audit/audit.rules > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.17 Ensure kernel module loading and unloading is collected [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.17 Ensure kernel module loading and unloading is collected [${fail}${out}${end}]"
+  fi
+  echo "4.1.17, Ensure kernel module loading and unloading is collected, $out" >> $report
+  checks=$((checks+1))
+  $slp
 
+  grep "^\s*[^#]" /etc/audit/audit.rules | grep '-e 2' > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.1.18 Ensure the audit configuration is immutable [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.1.18 Ensure the audit configuration is immutable [${fail}${out}${end}]"
+  fi
+  echo "4.1.18, Ensure the audit configuration is immutable, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sudo systemctl is-enabled rsyslog > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.2.1.1 Ensure rsyslog Service is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.1.1 Ensure rsyslog Service is enabled [${fail}${out}${end}]"
+  fi
+  echo "4.2.1.1, Ensure rsyslog Service is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(ls -l /var/log | head -1 | awk '{print $2}')
+  if [ $var1 -gt 0 ];then
+    local out="PASS"
+    echo -e "${good} 4.2.1.2 Ensure logging is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.1.2 Ensure logging is configured [${fail}${out}${end}]"
+  fi
+  echo "4.2.1.2, Ensure logging is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf | cut -d ' ' -f 2)
+  if [ $var1 -eq 0640 ];then
+    local out="PASS"
+    echo -e "${good} 4.2.1.3 Ensure rsyslog default file permissions configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.1.3 Ensure rsyslog default file permissions configured [${fail}${out}${end}]"
+  fi
+  echo "4.2.1.3, Ensure rsyslog default file permissions configured $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "^*.*[^I][^I]*@" /etc/rsyslog.conf /etc/rsyslog.d/*.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host [${fail}${out}${end}]"
+  fi
+  echo "4.2.1.4, Ensure rsyslog is configured to send logs to a remote log host, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep '$ModLoad imtcp' /etc/rsyslog.conf /etc/rsyslog.d/*.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    grep '$InputTCPServerRun' /etc/rsyslog.conf /etc/rsyslog.d/*.conf > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+      echo -e "${bad} 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts [${fail}${out}${end}]"
+  fi
+  echo "4.2.1.5, Ensure remote rsyslog messages are only accepted on designated log hosts, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sudo systemctl is-enabled syslog-ng > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.2.2.1 Ensure syslog-ng service is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.2.1 Ensure syslog-ng service is enabled [${fail}${out}${end}]"
+  fi
+  echo "4.2.2.1, Ensure syslog-ng service is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(ls -l /var/log | head -1 | awk '{print $2}')
+  if [ $var1 -gt 0 ];then
+    local out="PASS"
+    echo -e "${good} 4.2.2.2 Ensure logging is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.2.2 Ensure logging is configured [${fail}${out}${end}]"
+  fi
+  echo "4.2.2.2, Ensure logging is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "^options" /etc/syslog-ng/syslog-ng.conf | grep '0640' > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.2.2.3 Ensure syslog-ng default file permissions configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.2.3 Ensure syslog-ng default file permissions configured [${fail}${out}${end}]"
+  fi
+  echo "4.2.2.3, Ensure syslog-ng default file permissions configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep "^*.*[^I][^I]*@" /etc/syslog-ng/syslog-ng.conf > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 4.2.2.4 Ensure syslog-ng is configured to send logs to a remote log host [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.2.4 Ensure syslog-ng is configured to send logs to a remote log host [${fail}${out}${end}]"
+  fi
+  echo "4.2.2.4, Ensure syslog-ng is configured to send logs to a remote log host, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 4.2.2.5 Ensure remote syslog-ng messages are only accepted on designated log hosts [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "4.2.2.5, Ensure remote syslog-ng messages are only accepted on designated log hosts, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  rpm -q rsyslog > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    rpm -q syslog-ng > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      local out="PASS"
+      echo -e "${good} 4.2.3 Ensure rsyslog or syslog-ng is installed [${passed}${out}${end}]"
+      counter=$((counter+1))
+    else
+      local out="FAIL"
+    echo -e "${bad} 4.2.3 Ensure rsyslog or syslog-ng is installed [${fail}${out}${end}]"
+    fi
+  else
+    local out="FAIL"
+    echo -e "${bad} 4.2.3 Ensure rsyslog or syslog-ng is installed [${fail}${out}${end}]"
+  fi
+  echo "4.2.3, Ensure rsyslog or syslog-ng is installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  4.2.4 Ensure permissions on all logfiles are configured
+  while IFS= read -r line
+  do
+    archivo=$line
+    other=$(stat -c "%a" $line | cut -c 3)
+    groups=$(stat -c "%a" $line | cut -c 2)
+    if [ $other -gt 0 ];then
+        #echo "$archivo has other permissions"
+    fi
+    if [ $groups -gt 4 ];then
+        echo "$archivo has permissive groups access"
+    fi
+  done < <(find /var/log -type f 2>/dev/null)
+while IFS= read -r line
+  do
+    archivo=$line
+    other=$(stat -c "%a" $line | cut -c 3)
+    groups=$(stat -c "%a" $line | cut -c 2)
+    if [ $other -gt 0 ];then
+        #echo "$archivo has other permissions"
+    fi
+    if [ $groups -gt 4 ];then
+        echo "$archivo has permissive groups access"
+    fi
+  done < <(find /var/log -type f 2>/dev/null)
 
 
 
