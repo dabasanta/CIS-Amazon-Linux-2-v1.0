@@ -2444,7 +2444,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  var1=$(sshd -T | grep logingracetime | cut -d ' ' -f)
+  var1=$(sshd -T 2>/dev/null| grep logingracetime | cut -d ' ' -f 2)
   if [[ "$var1" -gt 1 ]] && [[ "$var1" -le 60 ]];then
     local out="PASS"
     echo -e "${good} 5.2.17 Ensure SSH LoginGraceTime is set to one minute or less [${passed}${out}${end}]"
@@ -2457,13 +2457,13 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  sshd -T | grep allowusers > /dev/null 2>&1
+  sshd -T 2> /dev/null| grep allowusers > /dev/null 2>&1
   var1=$(echo $?)
-  sshd -T | grep allowgroups > /dev/null 2>&1
+  sshd -T 2> /dev/null| grep allowgroups > /dev/null 2>&1
   var2=$(echo $?)
-  sshd -T | grep denyusers > /dev/null 2>&1
+  sshd -T 2> /dev/null| grep denyusers > /dev/null 2>&1
   var3=$(echo $?)
-  shd -T | grep denygroups > /dev/null 2>&1
+  sshd -T 2> /dev/null| grep denygroups > /dev/null 2>&1
   var4=$(echo $?)
   var5=$((var1+var2+var3+var4))
   if [ $var5 -eq 0 ];then
@@ -2478,7 +2478,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  var1=$(sshd -T | grep banner | cut -d ' ' -f 2)
+  var1=$(sshd -T 2>/dev/null| grep banner | cut -d ' ' -f 2)
   if [[ "$var1" != "none" ]];then
     local out="PASS"
     echo -e "${good} 5.2.19 Ensure SSH warning banner is configured [${passed}${out}${end}]"
@@ -2535,7 +2535,7 @@ checkL1() {
   $slp
 
 
-  var1=$(grep -E '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth | awk '{print $4}' | cut -c 4-6)
+  var1=$(grep -E '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth 2>/dev/null | awk '{print $4}' | cut -c 4-6)
   if [[ "$var1" == "512" ]];then
     local out="PASS"
     echo -e "${good} 5.3.4 Ensure password hashing algorithm is SHA-512 [${passed}${out}${end}]"
@@ -2561,7 +2561,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  var1=(grep PASS_MIN_DAYS /etc/login.defs | grep -v '#' | awk '{print $2}')
+  var1=$(grep PASS_MIN_DAYS /etc/login.defs | grep -v '#' | awk '{print $2}')
   if [ $var1 -ge 7 ];then
     local out="PASS"
     echo -e "${good} 5.4.1.2 Ensure minimum days between password changes is 7 or more [${passed}${out}${end}]"
@@ -2574,7 +2574,7 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
-  var1=(grep PASS_WARN_AGE /etc/login.defs | grep -v '#' | awk '{print $2}')
+  var1=$(grep PASS_WARN_AGE /etc/login.defs | grep -v '#' | awk '{print $2}')
   if [ $var1 -ge 7 ];then
     local out="PASS"
     echo -e "${good} 5.4.1.3 Ensure password expiration warning days is 7 or more [${passed}${out}${end}]"
@@ -2586,6 +2586,129 @@ checkL1() {
   echo "5.4.1.3, Ensure password expiration warning days is 7 or more, $out " >> $report
   checks=$((checks+1))
   $slp
+
+  var1=$(useradd -D | grep INACTIVE | cut -d = -f 2)
+  if [ $var1 -le 30 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.1.4 Ensure inactive password lock is 30 days or less [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.1.4 Ensure inactive password lock is 30 days or less [${fail}${out}${end}]"
+  fi
+  echo "5.4.1.4, Ensure inactive password lock is 30 days or less, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.4.1.5 Ensure all users last password change date is in the past [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.4.1.5, Ensure all users last password change date is in the past, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+  sudo egrep -v "^\+" /etc/passwd | sudo awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/usr/sbin/nologin" && $7!="/bin/false") {print}' > /dev/null 2>&1
+  for user in `sudo awk -F: '($1!="root" && $3 < 1000) {print $1 }' /etc/passwd`; do
+    sudo passwd -S $user | awk -F ' ' '($2!="L") {print $1}' > /dev/null 2>&1
+  done
+  if [ $? -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.2 Ensure system accounts are non-login [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.2 Ensure system accounts are non-login [${fail}${out}${end}]"
+  fi
+  echo "5.4.2, Ensure system accounts are non-login, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(grep "^root:" /etc/passwd | cut -f4 -d:)
+  if [ $var1 -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 5.4.3 Ensure default group for the root account is GID 0  [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.3 Ensure default group for the root account is GID 0  [${fail}${out}${end}]"
+  fi
+  echo "5.4.3, Ensure default group for the root account is GID 0 , $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(grep "umask" /etc/bashrc | tail -1 | awk '{print $2}')
+  if [[ $var1 -eq 027 ]];then
+    local out="PASS"
+    echo -e "${good} 5.4.4 Ensure default user umask is 027 or more restrictive [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.4 Ensure default user umask is 027 or more restrictive [${fail}${out}${end}]"
+  fi
+  echo "5.4.4, Ensure default user umask is 027 or more restrictive, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(grep "^TMOUT" /etc/bashrc | cut -d = -f 2)
+  if [[ $var -le 900 ]];then
+    local out="PASS"
+    echo -e "${good} 5.4.5 Ensure default user shell timeout is 900 seconds or less [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 5.4.5 Ensure default user shell timeout is 900 seconds or less [${fail}${out}${end}]"
+  fi
+  echo "5.4.5, Ensure default user shell timeout is 900 seconds or less, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  cat /etc/securetty > /dev/null 2>&1
+   if [ $? -eq 0 ];then
+    local out="FAIL"
+    echo -e "${bad} 5.5 Ensure root login is restricted to system console [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 5.5 Ensure root login is restricted to system console [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "5.5, Ensure root login is restricted to system console, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 5.6 Ensure access to the su command is restricted [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "5.6, Ensure access to the su command is restricted, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.1.1 Audit system file permissions [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.1.1, Audit system file permissions, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/passwd | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/passwd | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/passwd)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 644 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.2 Ensure permissions on /etc/passwd are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.2 Ensure permissions on /etc/passwd are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.2, Ensure permissions on /etc/passwd are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
+
+
+
+
+
 
 
 
@@ -2604,7 +2727,7 @@ checkL1() {
 }
 
 banner
-checkEnviroment
+#checkEnviroment
 initCSV
 checkL1
 
