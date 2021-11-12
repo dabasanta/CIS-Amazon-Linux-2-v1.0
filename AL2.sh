@@ -1223,15 +1223,15 @@ checkL1() {
   do
     var3=$line
     var4=$line
-  done < <(grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+  done < <( grep "net\.ipv4\.conf\.all\.log_martians" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
 
   while IFS= read -r line
   do
     var5=$line
     var6=$line
-  done < <(grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+  done < <(grep "net\.ipv4\.conf\.default\.log_martians" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
 
-  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ];then
+  if [ "$var1" -eq 1 ] && [ "$var2" -eq 2 ]  && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ]  && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ];then
     local out="PASS"
     echo -e "${good} 3.2.4 Ensure suspicious packets are logged [${passed}${out}${end}]"
     counter=$((counter+1))
@@ -1280,6 +1280,201 @@ checkL1() {
   echo "3.2.6, Ensure bogus ICMP responses are ignored, $out" >> $report
   checks=$((checks+1))
   $slp
+
+  var1=$(sysctl net.ipv4.conf.all.rp_filter)
+  var2=$(sysctl net.ipv4.conf.default.rp_filter)
+
+  while IFS= read -r line
+  do
+    var3=$line
+    var4=$line
+  done < <(grep "net\.ipv4\.conf\.all\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var5=$line
+    var6=$line
+  done < <(grep "net\.ipv4\.conf\.default\.rp_filter" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 1 ] && [ "$var2" -eq 1 ] && [ "$var3" -eq 1 ] && [ "$var4" -eq 1 ] && [ "$var5" -eq 1 ] && [ "$var6" -eq 1 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.7 Ensure Reverse Path Filtering is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.7 Ensure Reverse Path Filtering is enabled [${fail}${out}${end}]"
+  fi
+  echo "3.2.7, Ensure Reverse Path Filtering is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv4.tcp_syncookies | cut -d = -f 2 | sed 's/\s//g')
+  while IFS= read -r line
+  do
+    var2=$line
+    var3=$line
+  done < <(grep "net\.ipv4\.tcp_syncookies" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 1 ] && [ "$var2" -eq 1 ] && [ "$var3" -eq 1 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.8 Ensure TCP SYN Cookies is enabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.8 Ensure TCP SYN Cookies is enabled [${fail}${out}${end}]"
+  fi
+  echo "3.2.8, Ensure TCP SYN Cookies is enabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(sysctl net.ipv6.conf.all.accept_ra | cut -d = -f 2 | sed 's/\s//g')
+  var2=$(sysctl net.ipv6.conf.default.accept_ra | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var3=$line
+    var4=$line
+  done < <(grep "net\.ipv6\.conf\.all\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  while IFS= read -r line
+  do
+    var5=$line
+    var6=$line
+  done < <(grep "net\.ipv6\.conf\.default\.accept_ra" /etc/sysctl.conf /etc/sysctl.d/* | cut -d = -f 2 | sed 's/\s//g')
+
+  if [ "$var1" -eq 0 ] && [ "$var2" -eq 0 ] && [ "$var3" -eq 0 ] && [ "$var4" -eq 0 ] && [ "$var5" -eq 0 ] && [ "$var6" -eq 0 ];then
+    local out="PASS"
+    echo -e "${good} 3.2.9 Ensure IPv6 router advertisements are not accepted [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.2.9 Ensure IPv6 router advertisements are not accepted [${fail}${out}${end}]"
+  fi
+  echo "3.2.9, Ensure IPv6 router advertisements are not accepted, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  rpm -q tcp_wrappers > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.3.1 Ensure TCP Wrappers is installed [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.3.1 Ensure TCP Wrappers is installed [${fail}${out}${end}]"
+  fi
+  echo "3.3.1, Ensure TCP Wrappers is installed, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep '#' -v /etc/hosts.allow | grep 'ALL:' > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.3.2 Ensure /etc/hosts.allow is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.3.2 Ensure /etc/hosts.allow is configured [${fail}${out}${end}]"
+  fi
+  echo "3.3.2, Ensure /etc/hosts.allow is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep '#' -v /etc/hosts.deny | grep 'ALL:' > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.3.3 Ensure /etc/hosts.deny is configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.3.3 Ensure /etc/hosts.deny is configured [${fail}${out}${end}]"
+  fi
+  echo "3.3.3, Ensure /etc/hosts.deny is configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat stat /etc/hosts.allow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.3.4 Ensure permissions on /etc/hosts.allow are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.3.4 Ensure permissions on /etc/hosts.allow are configured [${fail}${out}${end}]"
+  fi
+  echo "3.3.4, Ensure permissions on /etc/hosts.allow are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat stat /etc/hosts.deny | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  if [ "$uid" -eq 0 ] && [ "$gid" -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 3.3.5 Ensure permissions on /etc/hosts.deny are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 3.3.5 Ensure permissions on /etc/hosts.deny are configured [${fail}${out}${end}]"
+  fi
+  echo "3.3.5, Ensure permissions on /etc/hosts.deny are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  modprobe -n -v dccp > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.4.1 Ensure DCCP is disabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.4.1 Ensure DCCP is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.4.1, Ensure DCCP is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  modprobe -n -v sctp > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.4.2 Ensure SCTP is disabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.4.2 Ensure SCTP is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.4.2, Ensure SCTP is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  modprobe -n -v rds > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.4.3 Ensure RDS is disabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.4.3 Ensure RDS is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.4.3, Ensure RDS is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  modprobe -n -v tipc > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 3.4.4 Ensure TIPC is disabled [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 3.4.4 Ensure TIPC is disabled [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "3.4.4, Ensure TIPC is disabled, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+
+
 
 
 
