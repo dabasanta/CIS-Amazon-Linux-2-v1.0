@@ -2663,7 +2663,7 @@ checkL1() {
   $slp
 
   cat /etc/securetty > /dev/null 2>&1
-   if [ $? -eq 0 ];then
+  if [ $? -eq 0 ];then
     local out="FAIL"
     echo -e "${bad} 5.5 Ensure root login is restricted to system console [${fail}${out}${end}]"
   else
@@ -2702,25 +2702,287 @@ checkL1() {
   checks=$((checks+1))
   $slp
 
+  uid=$(stat /etc/shadow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/shadow | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/shadow)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.3 Ensure permissions on /etc/shadow are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.3 Ensure permissions on /etc/shadow are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.3, Ensure permissions on /etc/shadow are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/group | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/group | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/group)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 644 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.4 Ensure permissions on /etc/group are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.4 Ensure permissions on /etc/group are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.4, Ensure permissions on /etc/group are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/gshadow | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/gshadow | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/gshadow)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.5 Ensure permissions on /etc/gshadow are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.5 Ensure permissions on /etc/gshadow are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.5, Ensure permissions on /etc/gshadow are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/passwd- | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat //etc/passwd- | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/passwd-)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 644 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.6 Ensure permissions on /etc/passwd- are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.6 Ensure permissions on /etc/passwd- are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.6, Ensure permissions on /etc/passwd- are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/shadow- | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/shadow- | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/shadow-)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.7 Ensure permissions on /etc/shadow- [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.7 Ensure permissions on /etc/shadow- [${fail}${out}${end}]"
+  fi
+  echo "6.1.7, Ensure permissions on /etc/shadow-, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/group- | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/group- | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/group-)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 644 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.8 Ensure permissions on /etc/group- are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.8 Ensure permissions on /etc/group- are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.8, Ensure permissions on /etc/group- are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  uid=$(stat /etc/gshadow- | grep 'Uid' | awk '{print $5}' | tr -d '/')
+  gid=$(stat /etc/gshadow- | grep 'Uid' | awk '{print $9}' | tr -d '/')
+  var1=$(stat -c "%a" /etc/gshadow-)
+  if [ $uid -eq 0 ] && [ $gid -eq 0 ] && [ $var1 -eq 0 ]; then
+    local out="PASS"
+    echo -e "${good} 6.1.9 Ensure permissions on /etc/gshadow- are configured [${passed}${out}${end}]"
+    counter=$((counter+1))
+  else
+    local out="FAIL"
+    echo -e "${bad} 6.1.9 Ensure permissions on /etc/gshadow- are configured [${fail}${out}${end}]"
+  fi
+  echo "6.1.9, Ensure permissions on /etc/gshadow- are configured, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  df --local -P 2>/dev/null | awk {'if (NR!=1) print $6'} 2>/dev/null | xargs -I '{}' find '{}' -xdev -type f -perm -0002 2>/dev/null > /tmp/wwf.tmp
+  var1=$(wc -l /tmp/wwf.tmp | cut -d ' ' -f 1)
+  if [ $var1 -gt 1 ];then
+    local out="FAIL"
+    echo -e "${bad} 6.1.11 Ensure no unowned files or directories exist [${fail}${out}${end}]"
+    if [ $var1 -lt 150 ];then
+      echo -e "\nWorld writable files:\n"
+      while IFS= read -r line;do
+        echo -e "${fail}$line${end}"
+        sleep 0.1s
+      done < <(cat /tmp/wwf.tmp)
+      echo -e "\nUse 'chmod o-w <filename>' to remediate these files\n"
+    else
+      echo -e "\n\nWorld writable files are found. Use 'chmod o-w <filename>' to remediate these files\n"
+    fi
+  else
+    local out="PASS"
+    echo -e "${good} 6.1.11 Ensure no unowned files or directories exist [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.1.11, Ensure no unowned files or directories exist, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  df --local -P 2>/dev/null| awk {'if (NR!=1) print $6'} 2>/dev/null| xargs -I '{}' find '{}' -xdev -nouser 2>/dev/null > /tmp/wwf.tmp
+  var1=$(wc -l /tmp/wwf.tmp | cut -d ' ' -f 1)
+  if [ $var1 -gt 1 ];then
+    local out="FAIL"
+    echo -e "${bad} 6.1.11 Ensure no unowned files or directories exist [${fail}${out}${end}]"
+    if [ $var1 -lt 150 ];then
+      echo -e "\nUnowned files:\n"
+      while IFS= read -r line;do
+        echo -e "${fail}$line${end}"
+        sleep 0.1s
+      done < <(cat /tmp/wwf.tmp)
+    else
+      echo -e "\n\nUnowned files are found.\n"
+    fi
+  else
+    local out="PASS"
+    echo -e "${good} 6.1.11 Ensure no unowned files or directories exist [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.1.11, Ensure no unowned files or directories exist, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  df --local -P 2>/dev/null| awk {'if (NR!=1) print $6'} 2>/dev/null| xargs -I '{}' find '{}' -xdev -nogroup 2>/dev/null > /tmp/wwf.tmp
+  var1=$(wc -l /tmp/wwf.tmp | cut -d ' ' -f 1)
+  if [ $var1 -gt 1 ];then
+    local out="FAIL"
+    echo -e "${bad} 6.1.12 Ensure no ungrouped files or directories exist [${fail}${out}${end}]"
+    if [ $var1 -lt 150 ];then
+      echo -e "\nUngrouped files:\n"
+      while IFS= read -r line;do
+        echo -e "${fail}$line${end}"
+        sleep 0.1s
+      done < <(cat /tmp/wwf.tmp)
+    else
+      echo -e "\n\nUngrouped files are found.\n"
+    fi
+  else
+    local out="PASS"
+    echo -e "${good} 6.1.12 Ensure no ungrouped files or directories exist [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.1.12, Ensure no ungrouped files or directories existt, $out " >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.1.13 Audit SUID executables [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.1.13, Audit SUID executables, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.1.14 Audit SGID executables [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.1.14, Audit SGID executables, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.2.1 Ensure password fields are not empty [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.2.1, Ensure password fields are not empty, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep '^\+:' /etc/passwd > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 6.2.2 Ensure no legacy + entries exist in /etc/passwd [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 6.2.2 Ensure no legacy + entries exist in /etc/passwd [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.2.2, Ensure no legacy + entries exist in /etc/passwd, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  sudo grep '^\+:' /etc/shadow > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 6.2.3 Ensure no legacy + entries exist in /etc/shadow [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 6.2.3 Ensure no legacy + entries exist in /etc/shadow [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.2.3, Ensure no legacy + entries exist in /etc/shadow, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  grep '^\+:' /etc/group > /dev/null 2>&1
+   if [ $? -eq 0 ]; then
+    local out="FAIL"
+    echo -e "${bad} 6.2.4 Ensure no legacy + entries exist in /etc/group [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 6.2.4 Ensure no legacy + entries exist in /etc/group [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.2.4, Ensure no legacy + entries exist in /etc/group, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  var1=$(cat /etc/passwd | awk -F: '($3 == 0) { print $1 }')
+  if [ "$var1" != "root" ]; then
+    local out="FAIL"
+    echo -e "${bad} 6.2.5 Ensure root is the only UID 0 account [${fail}${out}${end}]"
+  else
+    local out="PASS"
+    echo -e "${good} 6.2.5 Ensure root is the only UID 0 account [${passed}${out}${end}]"
+    counter=$((counter+1))
+  fi
+  echo "6.2.5, Ensure root is the only UID 0 account, $out" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.2.6 Ensure root PATH Integrity [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.2.6, Ensure root PATH Integrity, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  echo -e "${good} 6.2.7 Ensure all users' home directories exist [${passed}! MANUAL !${end}]"
+  counter=$((counter+1))
+  echo "6.2.7, Ensure all users home directories exist, MANUAL" >> $report
+  checks=$((checks+1))
+  $slp
+
+  6.2.8 Ensure users home directories permissions are 750 or more restrictive
 
 
+  6.2.9 Ensure users own their home directories
 
+  6.2.10 Ensure users dot files are not group or world writable
 
+  6.2.11 Ensure no users have .forward files
 
+  6.2.12 Ensure no users have .netrc files
 
+  6.2.13 Ensure users .netrc Files are not group or world accessible
 
+  6.2.14 Ensure no users have .rhosts files
 
+  6.2.15 Ensure all groups in /etc/passwd exist in /etc/group
 
+  6.2.16 Ensure no duplicate UIDs exist
 
+  6.2.17 Ensure no duplicate GIDs exist
 
+  6.2.18 Ensure no duplicate user names exist
 
-
-
-
-
-
-
-# vamos por la 306 !!1
+  6.2.19 Ensure no duplicate group names exist
 
   echo $checks
   echo $counter
