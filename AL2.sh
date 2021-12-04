@@ -2989,7 +2989,6 @@ checkL1() {
 }
 
 banner
-#checkEnviroment
 initCSV
 checkL1
 
